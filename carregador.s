@@ -22,7 +22,44 @@ global fit
 ;       nenhum valor, chama a funcao que printa onde o programa vai ficar guardado
 
 fit:
-        
+        enter 0, 0
+
+        ; primeiro loop pra ver se cabe completo em algum bloco
+        mov EAX, EBP
+        mov EBX, [EBP+8]
+        mov ECX, 4      ; tamanho do loop
+for1:   cmp DWORD [EAX + 12], -1
+        je break1   ; se nao tem mais valores sai
+        cmp [EAX + 16], EBX
+        jge full_fit
+        add EAX, 8
+        loop for1
+
+break1: 
+        ; nao cabe inteiro em um endereco, entao a gente itera pela lista de enderecos pra ver quantos sao necessarios pra colocar esse programa
+        mov EAX, EBP
+        mov EBX, [EBP+8]
+        mov ECX, 1
+for2:   cmp EBX, [EAX+16]
+
+
+
+partial_fit:
+
+
+no_fit:
+        push DWORD -1
+        call print_ans
+        add ESP, 4      ; desempilhando o -1
+        jmp fim_fit
+
+full_fit:
+        ; empilhar que temos um par de argumentos so, que eh o endereco que a gente achou e o tamanho do codigo
+        jmp fim_fit
+
+fim_fit:
+        leave
+        ret
 
 
 ; funcao pra printar tudo
