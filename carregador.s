@@ -18,26 +18,6 @@ section .bss
 section .text
 
 global fit
-global _start
-
-_start:
-        push dword 345
-        push dword 30000 
-        push dword 125
-        push dword 20000
-        push dword 300
-        push dword 4000
-        push dword 500
-        push dword 100
-        push dword 1270
-
-        ;push dword -1
-        ;call print_ans
-        call fit
-
-        mov eax, 1
-        mov ebx, 0
-        int 80h
 
 ; void fit(int sz, int e1, int s1, int e2, int s2, int e3, int s3, int e4, int s4)
 ; funcao que realiza os calculos para colocar o programa de tamanho sz na memoria, estando disponiveis os enderecos eX, com espaco sX (1 <= X <= 4)
@@ -140,7 +120,7 @@ print_up_stack:
         add eax, 8
         dec ecx
         jmp print_up_stack
-        
+
 break_up:
         mov ecx, 1
 
