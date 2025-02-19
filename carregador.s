@@ -56,15 +56,13 @@ for2:   cmp ebx, [eax+16]
 
 
 partial_fit:
-
+        push ebx
+        push [eax+12]
+        push ecx
+        call print_ans
+        jmp fim_fit
 
 no_fit:
-        ; desempilhando os argumentos que a gente tinha empilhado
-        dec ecx
-for_no_fit: 
-        add esp, 8
-        loop for_no_fit
-
         push dword -1
         call print_ans
         add esp, 4      ; desempilhando o -1
@@ -72,14 +70,21 @@ for_no_fit:
 
 full_fit:
         ; empilhar que temos um par de argumentos so, que eh o endereco que a gente achou e o tamanho do codigo
-        push [eax + 12]
         push ebx
+        push [eax + 12]
         push dword 1
         call print_ans
         add esp, 12
         jmp fim_fit
 
+; loop para desempilhar tudo que eu empilhei durante a funcao
 fim_fit:
+        cmp esp, ebp
+        je fit_ret
+        add esp, 4
+        jmp fim_fit
+
+fit_ret:
         leave
         ret
 
