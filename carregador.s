@@ -42,13 +42,29 @@ break1:
         mov ecx, 1
 for2:   cmp ebx, [eax+16]
         jle partial_fit
-        ; terminar parte de ir subtraindo e empilhando
+        ; se nao cabe, coloca tudo que pode nessa secao de memoria
+        sub ebx, [eax+16]
+        push dword [eax+16]
+        push dword [eax+12]
+        add eax, 8      ; proximo argumento
+        inc ecx
+        cmp ecx, 5
+        je no_fit       ; nao tem mais argumentos da funcao, entao nao cabe
+        cmp dword [eax+12], -1 
+        je no_fit       ; se o proximo argumento eh -1, entao eh valor invalido, logo eh no_fit
+        jmp for2    
 
 
 partial_fit:
 
 
 no_fit:
+        ; desempilhando os argumentos que a gente tinha empilhado
+        dec ecx
+for_no_fit: 
+        add esp, 8
+        loop for_no_fit
+
         push dword -1
         call print_ans
         add esp, 4      ; desempilhando o -1
