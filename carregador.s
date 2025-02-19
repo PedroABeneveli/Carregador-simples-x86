@@ -7,7 +7,11 @@ endline: db 10          ; ascii de \n
 zero_ascii: dd 48       ; ascii de '0'
 
 ; strings utilizadas pelo print_ans
-fail_string: db "Nao eh possivel carregar o programa na memoria", 10, 0
+fail_string: db "Nao eh possivel carregar o programa na memoria.", 10, 0
+block_str1: db "Pedaco ", 0
+block_str2: db " esta no endereco ", 0
+block_str3: db " ocupando ", 0
+block_str4: db " espacos da memoria.", 10, 0
 
 section .bss
 
@@ -106,15 +110,77 @@ print_ans:
         cmp dword [ebp+8], -1
         je print_fail
 
+        mov ecx, 1
+        mov eax, ebp
+loop_print_ans:
+        push eax
+        push ecx
+
+        push dword 7
+        push block_str1
+        call print_str
+        add esp, 8
+
+        push dword [esp]
+        call print_num
+        add esp, 4
+
+        push dword 18
+        push block_str2
+        call print_str
+        add esp, 8
+
+        ; print endereco
+        mov eax, [esp-4]
+        push dword [eax + 12]
+        call print_num
+        add esp, 4
+
+        push dword 10
+        push block_str3
+        call print_str
+        add esp, 8
+
+        ; printando tamanho
+        mov eax, [esp-4]
+        push dword [eax + 16]
+        call print_num
+        add esp, 4
+
+        push dword 20
+        push block_str4
+        call print_str
+        add esp, 8
+
+        pop ecx
+        pop eax
+
+        cmp ecx, [ebp + 8]
+        je fim_print_ans
+        inc ecx
+        add eax, 8
+        jmp loop_print_ans
+
 print_fail:
-        mov eax, 3
-        mov ebx, 1
-        mov ecx, fail_string
-        mov edx, 47     ; tamanho da string
-        int 80h
+        push dword 48
+        push fail_string
+        call print_str
+        add esp, 8
         jmp fim_print_ans
 
 fim_print_ans:
+        leave
+        ret
+
+; print_str(char* str, int sz)
+; funcao que printa uma string
+print_str:
+        enter 0,0
+        mov eax, 3
+        mov ebx, 1
+        mov ecx, [ebp+8]
+        mov edx, [ebp+12]
+        int 80h
         leave
         ret
 
