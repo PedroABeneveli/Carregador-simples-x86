@@ -6,6 +6,9 @@ section .data
 endline: db 10          ; ascii de \n
 zero_ascii: dd 48       ; ascii de '0'
 
+; strings utilizadas pelo print_ans
+fail_string: db "Nao eh possivel carregar o programa na memoria", 10, 0
+
 section .bss
 
 section .text
@@ -89,8 +92,31 @@ fit_ret:
         ret
 
 
-; funcao pra printar tudo
+; void print_ans
+; funcao que, dado o numero de blocos e o numero de bytes, imprime em quais blocos e o quanto o programa ocupa, ou se nao eh possivel
+; entrada:
+;       - [ebx+8] = -1 se nao for possivel colocar o programa na memoria, caso contrario eh o numero de blocos que o programa ocupa
+;       - [ebx + 8*x + 12] = endereco do bloco x-1
+;       - [ebx + 8*x + 16] = tamanho ocupado no bloco x-1
+; saida:
+;       - prints no terminal
 print_ans:
+        enter 0, 0
+
+        cmp dword [ebp+8], -1
+        je print_fail
+
+print_fail:
+        mov eax, 3
+        mov ebx, 1
+        mov ecx, fail_string
+        mov edx, 47     ; tamanho da string
+        int 80h
+        jmp fim_print_ans
+
+fim_print_ans:
+        leave
+        ret
 
 ; print_num(int x)
 ; funcao que recebe um numero e printa esse numero no terminal
