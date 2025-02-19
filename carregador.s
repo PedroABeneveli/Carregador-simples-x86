@@ -18,6 +18,26 @@ section .bss
 section .text
 
 global fit
+global _start
+
+_start:
+        push dword 345
+        push dword 30000 
+        push dword 125
+        push dword 20000
+        push dword 300
+        push dword 4000
+        push dword 500
+        push dword 100
+        push dword 1270
+
+        ;push dword -1
+        ;call print_ans
+        call fit
+
+        mov eax, 1
+        mov ebx, 0
+        int 80h
 
 ; void fit(int sz, int e1, int s1, int e2, int s2, int e3, int s3, int e4, int s4)
 ; funcao que realiza os calculos para colocar o programa de tamanho sz na memoria, estando disponiveis os enderecos eX, com espaco sX (1 <= X <= 4)
@@ -64,7 +84,7 @@ for2:   cmp ebx, [eax+16]
 
 partial_fit:
         push ebx
-        push [eax+12]
+        push dword [eax+12]
         push ecx
         call print_ans
         jmp fim_fit
@@ -78,7 +98,7 @@ no_fit:
 full_fit:
         ; empilhar que temos um par de argumentos so, que eh o endereco que a gente achou e o tamanho do codigo
         push ebx
-        push [eax + 12]
+        push dword [eax + 12]
         push dword 1
         call print_ans
         add esp, 12
@@ -110,8 +130,20 @@ print_ans:
         cmp dword [ebp+8], -1
         je print_fail
 
-        mov ecx, 1
+        ; encontro qual eh o endereco em que eu consigo achar o ultimo argumrnto facil
+        mov ecx, [ebp+8]
+        dec ecx
         mov eax, ebp
+print_up_stack:
+        cmp ecx, 0
+        je break_up
+        add eax, 8
+        dec ecx
+        jmp print_up_stack
+        
+break_up:
+        mov ecx, 1
+
 loop_print_ans:
         push eax
         push ecx
@@ -131,7 +163,7 @@ loop_print_ans:
         add esp, 8
 
         ; print endereco
-        mov eax, [esp-4]
+        mov eax, [esp+4]
         push dword [eax + 12]
         call print_num
         add esp, 4
@@ -142,7 +174,7 @@ loop_print_ans:
         add esp, 8
 
         ; printando tamanho
-        mov eax, [esp-4]
+        mov eax, [esp+4]
         push dword [eax + 16]
         call print_num
         add esp, 4
@@ -152,13 +184,20 @@ loop_print_ans:
         call print_str
         add esp, 8
 
+        ; print '\n
+        mov eax, 4
+        mov ebx, 1
+        mov ecx, endline
+        mov edx, 1
+        int 80h
+
         pop ecx
         pop eax
 
         cmp ecx, [ebp + 8]
         je fim_print_ans
         inc ecx
-        add eax, 8
+        sub eax, 8
         jmp loop_print_ans
 
 print_fail:
@@ -176,7 +215,7 @@ fim_print_ans:
 ; funcao que printa uma string
 print_str:
         enter 0,0
-        mov eax, 3
+        mov eax, 4
         mov ebx, 1
         mov ecx, [ebp+8]
         mov edx, [ebp+12]
@@ -222,11 +261,5 @@ show_num:
     jmp show_num
 
 exit_print:
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, endline
-    mov edx, 1
-    int 80h
-
     leave
     ret
